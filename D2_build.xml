@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<project name="install" default="install">
+  <target name="install">
+	   <emc.install
+      dar="D2-DAR.dar"
+      docbase="xp20dev"
+      username="docadmin"
+      password="dkagh1234.."
+      domain=""/>
+	   <emc.install
+      dar="D2Widget-DAR.dar"
+      docbase="xp20dev"
+      username="docadmin"
+      password="dkagh1234.."
+      domain=""/>
+	   <emc.install
+      dar="Collaboration_Services.dar"
+      docbase="xp20dev"
+      username="docadmin"
+      password="dkagh1234.."
+      domain=""/>
+  </target>
+</project>

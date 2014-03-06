@@ -1,0 +1,201 @@
+﻿Content Server Install Command 
+
+"C:\Documentum\java64\1.7.0_17\jre\bin\javaw.exe" -jar "C:\setup\D2_4.2\D2_Premium_4.2.0\D2-Installer-4.2.0.jar" 
+
+C:\Program Files\EMC\D2\webapps
+
+
+Java Method Server Position
+C:\Documentum\jboss5.1.0\server\DctmServer_MethodServer\deploy\ServerApps.ear
+
+
+
+D2_4.1.0_P04.zip
+D2_PlusPack_4.1.0_P04.zip
+emc-dfs-sdk-7.0.zip 
+------ 아래 라이브 러리를 복사해서 넣어야 한다.
+
+xercesImpl.jar
+resolver.jar
+serializer.jar
+xml-apis.jar
+log4j.jar
+
+
+
+intall Message	
+WAR file(s) :
+Pack not selected
+	
+WAR file(s) :
+Pack not selected
+	
+Configuration file(s) :
+Pack not selected
+	
+D2-API files for Content Server :
+C:\Program Files\EMC\D2_D2_4.2
+	
+D2-API files for Java Method Server :
+C:\Documentum\jboss7.1.1\server\DctmServer_MethodServer\deployments\ServerApps.ear
+	
+DAR files :
+C:\Program Files\EMC\D2_D2_4.2\dar
+
+Lockbox files :
+C:\Documentum\D2\Lockbox
+
+
+-- content server deploy 
+C:\Program Files\EMC\D2_D2_4.2\dar directory for
+
+C:\Program Files\EMC\D2_D2_4.2\LBJNI.jar
+
+D2–DAR.dar Deploy to install D2.
+D2Widget-DAR.dar Deploy to install D2 Client.
+Collaboration_Services.dar
+Plug-in DAR files, such as C2–DAR.dar.
+------------------ Lockbox on the cS
+1. Set environment variables for the Lockbox dependency files extracted by the D2 installer.
+set CLASSPATH=C:\Program Files\EMC\D2_4.2\D2.jar;C:\Program Files\EMC\D2_4.2\LB.jar;C:\Program Files\EMC\D2_4.2\LBJNI.jar;
+
+2. Add the lockbox architecture found in the platform-specific folders extracted by the installer
+  to the environment variables.
+
+For Microsoft Windows:
+set PATH=C:\Documentum\D2\Lockbox\win_vc80_x64;%PATH%
+3. Install the Microsoft Visual C++ 2005 Service Pack 1 Redistributable Package MFC Security
+           Update. The platform folder used in step 9b contains the installer file.
+4. Generate the lockbox file and set the D2Method.passphrase using following command:
+java com.emc.common.java.crypto.SetLockboxProperty <path to store
+D2.lockbox> D2Method.passphrase <unencrypted password> <optional
+lockbox passphrase>
+
+java com.emc.common.java.crypto.SetLockboxProperty C:\Documentum\D2\Lockbox  D2Method.passphrase  dakgh1234..
+
+
+The D2Method.passphrase must be identical across all physical machines.
+If D2.lockbox does not exist when you run the command, D2 creates the file. You must
+generate the lockbox file for each physical machine in your environment, and you must not copy
+the lockbox file from one machine to another.
+If D2.lockbox already exists in the <path to store D2.lockbox> folder, the
+command does not change the passphrase. To change the lockbox passphrase, delete the existing
+D2.lockbox file.
+5.  Copy the D2.lockbox file generated to the Java Method Server classes folder as described in
+the following table:
+	C:\Documentum\jboss7.1.1\server\DctmServer_MethodServer\deployments/Server-Apps.ear/APP-INF/classes/
+
+
+4. If you are running Documentum Content Server 7.1:
+a. Create the folder <install path of Documentum>/<JBoss
+version>/modules/emc/d2/lockbox/main/
+b. Copy the LB.jar and LBJNI.jar files extracted by the installer to the /main/ folder.
+c. Create module.xml as described below and save it in the /main/ folder.
+<module xmlns="urn:jboss:module:1.1" name="emc.d2.lockbox">
+<resources>
+<resource-root path="LB.jar" />
+<resource-root path="LBJNI.jar" />
+</resources>
+</module>
+d. Open <install path of Documentum>/<JBoss
+version>/server/DctmServer_MethodServer/deployments/ServerApps.ear/
+META-INF/jboss-deployment-structure.xml in a text editor.
+e. Add the following lines to the <deployment> section:
+  <deployment>
+	아래에 다음 추가 
+		<dependencies>
+			<module name="emc.d2.lockbox" />
+		</dependencies>
+ 
+5. If you are running Documentum Content Server 7.1 and installed compatibility with Documentum
+Process Engine:
+a. Open the Documentum Process Engine <install path of Documentum>\<JBoss
+version>\server\DctmServer_MethodServer\deployments\bpm.ear\
+META-INF\jboss-deployment-structure.xml in a text editor.
+b. Add the following lines to the <deployment> section:
+<dependencies>
+<module name="emc.d2.lockbox" />
+</dependencies>
+------------------------------------------------------
+CS 에러 발생시 조치 사항
+  1) java.lang.ClassCastException: org.slf4j.impl.Slf4jLoggerFactory cannot be cast to ch.qos.logback.classic.LoggerContext 
+	  
+	  I tried to modify the module.xml in jboss\modules\org\slf4j\impl\main and pointed it to logback jars.
+	You need to exclude the servers version of slf4j from your deployment. Create a jboss-deployment-structure.xml file and place it in either your WARS META-INF or WEB-INF directory.
+
+	The contents of the file should look like this:
+
+	<jboss-deployment-structure>
+		<deployment>
+			<!-- Exclusions allow you to prevent the server from automatically adding some dependencies     -->
+			<exclusions>
+				<module name="org.slf4j" />
+				<module name="org.slf4j.impl" />
+			</exclusions>
+		</deployment>
+	</jboss-deployment-structure>
+  2) 에러 발생시 다음 tmp 파일을 삭제후에 재배포 해보자
+	C:\Documentum\jboss7.1.1\server\DctmServer_MethodServer\tmp
+----------------------------------
+cd C:\Documentum\product\7.1\install\composer\ComposerHeadless
+Starting cs server
+Make sure Documentum Content Server services are running.
+D2_darfile_install.cmd ,  D2_build.xml 을 이용한 3개 Dar file install
+
+The architecture for the lockbox file must match the Java Virtual Machine. For example, if you
+are using Linux x64 with a 32-bit Java Virual Machine, you must reference the linux_ia32
+architecture. If you are using an x86 environment (including non-itanium), use the ia32 kits.
+• For Microsoft Windows:
+set PATH=<path to the Lockbox files>\<platform folder>;%PATH%
+
+
+
+---- war file
+WAR file(s) :
+C:\Program Files\EMC\D2\webapps
+	
+Configuration file(s) :
+C:\setup\02.D24.1\d2_web_war
+	
+D2-API files for Content Server :
+Pack not selected
+	
+D2-API files for Java Method Server :
+Pack not selected
+	
+DAR files :
+Pack not selected
+
+-----------was에 이슈 발생시 처리 방법
+  1) [DFC_CORE_CRYPTO_ERROR] A cryptography error has occurred, please consult the documentation. {0} 이슈 처리방법
+  
+    ==== Configuring Lockbox on the Web Application Server ( D2-4.2-install_guid 44/133 )
+ 
+	1.Add the C6.Common-<version>.jar, LB.jar, and LBJNI.jar files extracted by the
+	installer to the ClassPath environment variable:
+	weblogic domain file에다가 추가 해야 함
+
+	set CLASSPATH=C:\app\D2-Config\WEB-INF\lib\C6-Common-4.2.0.jar;C:\D2\Lockbox\LB.jar;C:\D2\Lockbox\LBJNI.jar;%CLASSPATH%
+ 
+	
+	set CLASSPATH=C:\app\D2-Config\WEB-INF\lib\C6-Common-4.2.0.jar;%CLASSPATH%
+	 
+	
+	2.Add the lockbox architecture found in the platform-specific folders extracted by the installer
+	to the environment variables. Refer to the README found in each platform folder to
+	determine which folder corresponds to your environment
+	
+	set PATH=C:\D2\Lockbox\win_vc80_x64;%PATH%
+	
+	3. If your web application server uses Microsoft Windows, install the Microsoft Visual C++ 2005
+	Service Pack 1 Redistributable Package MFC Security Update. The platform folder used in
+	step 1b contains the installer file.
+	
+	4.Generate the lockbox file and set the D2Method.passphrase using following command: ()
+ 	java com.emc.common.java.crypto.SetLockboxProperty C:\D2\Lockbox  D2Method.passphrase  dakgh1234..
+	
+	5. D2FS.properties및 D2-Config.properties파일에 lockboxPath 위치 추가
+	   lockboxPath=C:/D2/Lockbox
+  ----------------------------------------------------------------------------------------------
+set classpath=%classpath%;C:\vfabric-tc-server-developer-2.8.2.RELEASE\dctm\webapps\D2\WEB-INF\lib\D2-API-4.1.0.jar
+java -classpath C:\vfabric-tc-server-developer-2.8.2.RELEASE\dctm\webapps\D2\WEB-INF\lib\D2-API-4.1.0.jar com.emc.d2.api.utils.GetCryptedPassword dkagh1234..
